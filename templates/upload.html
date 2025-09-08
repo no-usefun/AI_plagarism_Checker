@@ -14,61 +14,56 @@
             margin-bottom: 20px; 
             white-space: pre-wrap;
         }
-        .upload-box {
-            padding: 20px;
-            border: 2px dashed #888;
-            border-radius: 10px;
-            margin-bottom: 30px;
-        }
-        iframe, .docx-preview {
-            width: 100%;
-            border: 1px solid #aaa;
-            margin-bottom: 30px;
-        }
+        .upload-box { padding: 20px; border: 2px dashed #888; border-radius: 10px; margin-bottom: 30px; }
+        iframe, .docx-preview { width: 100%; border: 1px solid #aaa; margin-bottom: 30px; }
         iframe { height: 600px; }
         .docx-preview { padding: 10px; min-height: 400px; background: #f9f9f9; }
-        .preview-box { margin-bottom: 40px; }
+        .preview-box { margin-bottom: 40px; display: none; }
+        .btn { padding: 10px 20px; border-radius: 5px; cursor: pointer; margin-bottom: 20px; }
+        .btn-preview { background-color: #4CAF50; color: white; border: none; }
     </style>
 </head>
 <body>
     <h1>Upload PDF or DOCX and View Chunks</h1>
     <div class="upload-box">
         <form method="post" enctype="multipart/form-data">
-            <input type="file" name="file" required>
-            <br>
+            <input type="file" name="file" required><br><br>
             <input type="submit" value="Upload & Process">
         </form>
     </div>
 
-    {% if filetype == "pdf" %}
-        <div class="preview-box">
-            <h2>📄 Original PDF Preview:</h2>
-            <iframe src="{{ url_for('main.uploaded_file', filename=filename) }}"></iframe>
-        </div>
-    {% elif filetype == "docx" %}
-        <div class="preview-box">
-            <h2>📄 Original DOCX Preview:</h2>
-            <div id="docx-preview" class="docx-preview">Loading preview...</div>
-        </div>
-        <script>
-            fetch("{{ url_for('main.uploaded_file', filename=filename) }}")
-            .then(response => response.arrayBuffer())
-            .then(buffer => mammoth.extractRawText({arrayBuffer: buffer}))
-            .then(result => {
-                document.getElementById("docx-preview").innerText = result.value;
-            })
-            .catch(err => {
-                document.getElementById("docx-preview").innerText = "Failed to load DOCX preview.";
-                console.error(err);
-            });
-        </script>
-    {% endif %}
-
     {% if chunks %}
-        <h2>📑 Extracted Chunks:</h2>
-        {% for c in chunks %}
-            <div class="chunk">{{ c }}</div>
+        <button class="btn btn-preview" onclick="loadPreview()">Preview File</button>
+
+        <div id="file-preview" class="preview-box"></div>
+
+        <h2>📑 Paragraph-wise Chunks (Page-wise):</h2>
+        {% for page_num, para in chunks %}
+            <div class="chunk"><strong>Page {{ page_num }}:</strong> {{ para }}</div>
         {% endfor %}
     {% endif %}
+
+    <script>
+        let previewLoaded = false;
+        function loadPreview() {
+            const box = document.getElementById('file-preview');
+
+            if (!previewLoaded) {
+                {% if filetype == 'pdf' %}
+                    box.innerHTML = `<iframe src="{{ url_for('main.uploaded_file', filename=filename) }}"></iframe>`;
+                {% elif filetype == 'docx' %}
+                    box.innerHTML = `<div id="docx-preview" class="docx-preview">Loading preview...</div>`;
+                    fetch("{{ url_for('main.uploaded_file', filename=filename) }}")
+                        .then(response => response.arrayBuffer())
+                        .then(buffer => mammoth.extractRawText({arrayBuffer: buffer}))
+                        .then(result => { document.getElementById("docx-preview").innerText = result.value; })
+                        .catch(err => { document.getElementById("docx-preview").innerText = "Failed to load DOCX preview."; console.error(err); });
+                {% endif %}
+                previewLoaded = true;
+            }
+
+            box.style.display = box.style.display === 'none' ? 'block' : 'none';
+        }
+    </script>
 </body>
 </html>
