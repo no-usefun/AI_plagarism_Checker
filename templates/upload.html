@@ -1,17 +1,17 @@
 <!doctype html>
 <html>
 <head>
-    <title>File Chunker</title>
+    <title>AI File Chunker & Detector</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.4.13/mammoth.browser.min.js"></script>
     <style>
         body { font-family: Arial, sans-serif; margin: 40px; }
         h1 { color: #333; }
         .chunk { 
-            background: #f9f9f9; 
-            border: 1px solid #ccc; 
+            background: #ffe6e6; 
+            border: 1px solid #ff4d4d; 
             border-radius: 8px; 
             padding: 15px; 
-            margin-bottom: 20px; 
+            margin-bottom: 10px; 
             white-space: pre-wrap;
         }
         .upload-box { padding: 20px; border: 2px dashed #888; border-radius: 10px; margin-bottom: 30px; }
@@ -21,25 +21,54 @@
         .preview-box { margin-bottom: 40px; display: none; }
         .btn { padding: 10px 20px; border-radius: 5px; cursor: pointer; margin-bottom: 20px; }
         .btn-preview { background-color: #4CAF50; color: white; border: none; }
+        textarea { width: 100%; min-height: 100px; margin-bottom: 20px; }
     </style>
 </head>
 <body>
-    <h1>Upload PDF or DOCX and View Chunks</h1>
+    <h1>Upload PDF or DOCX and Detect AI Text</h1>
     <div class="upload-box">
         <form method="post" enctype="multipart/form-data">
-            <input type="file" name="file" required><br><br>
+            <input type="file" name="file"><br><br>
             <input type="submit" value="Upload & Process">
         </form>
     </div>
 
-    {% if chunks %}
+    <h2>Or Paste Text for AI Detection</h2>
+    <form method="POST">
+        <textarea name="input_text" placeholder="Paste your text here..."></textarea><br>
+        <input type="submit" value="Check Text">
+    </form>
+
+    {% if filename %}
         <button class="btn btn-preview" onclick="loadPreview()">Preview File</button>
-
         <div id="file-preview" class="preview-box"></div>
+    {% endif %}
 
-        <h2>📑 Paragraph-wise Chunks (Page-wise):</h2>
-        {% for page_num, para in chunks %}
-            <div class="chunk"><strong>Page {{ page_num }}:</strong> {{ para }}</div>
+    {% if chunks %}
+        <h2>📑 AI-generated Chunks Only:</h2>
+        {% for (page_num, para), detect in zipped_data %}
+            {% if detect.prediction == 'AI-generated' %}
+                <div class="chunk">
+                    <strong>Page {{ page_num }}:</strong> {{ para }}
+                    <br>
+                    <strong>Prediction:</strong> {{ detect.prediction }} | 
+                    <strong>Probability AI:</strong> {{ detect.probability_AI }}
+                </div>
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+
+    {% if text_detections %}
+        <h2>Text Input Detection:</h2>
+        {% for detect in text_detections %}
+            {% if detect.prediction == 'AI-generated' %}
+                <div class="chunk">
+                    {{ detect.text_preview }}
+                    <br>
+                    <strong>Prediction:</strong> {{ detect.prediction }} | 
+                    <strong>Probability AI:</strong> {{ detect.probability_AI }}
+                </div>
+            {% endif %}
         {% endfor %}
     {% endif %}
 
