@@ -1,104 +1,106 @@
 import PyPDF2
-import docx
+from docx import Document
 import joblib
+import re
+import unicodedata
 import os
 
-# Load models only once at startup
+# ---------------- Load Model & Vectorizer ----------------
 MODEL_PATH = os.path.join("models", "lightgbm_ai_detector.pkl")
 VECTORIZER_PATH = os.path.join("models", "tfidf_vectorizer.pkl")
 
 lgb_model = joblib.load(MODEL_PATH)
 vectorizer = joblib.load(VECTORIZER_PATH)
 
+# ---------------- Text Cleaning ----------------
+def clean_text(text):
+    """Normalize text to remove weird Unicode characters."""
+    if not text:
+        return ""
+    text = unicodedata.normalize('NFKC', text)
+    text = ''.join(c if c.isprintable() else ' ' for c in text)
+    # Replace fancy quotes
+    text = text.replace('“', '"').replace('”', '"').replace('‘', "'").replace('’', "'")
+    text = re.sub(r'\s+', ' ', text)
+    return text.strip()
 
-def extract_text_pdf(file_path):
+# ---------------- PDF Extraction ----------------
+
+def extract_paragraphs_pdf(file_path, min_words=200, max_words=300):
+
     reader = PyPDF2.PdfReader(file_path)
     pages = []
     for page in reader.pages:
         page_text = page.extract_text()
         if page_text:
-            paragraphs = [p.strip() for p in page_text.split("\n") if p.strip()]
+            # Split by double newline for real paragraphs
+            paragraphs = [clean_text(p) for p in re.split(r'\n\s*\n', page_text) if p.strip()]
             pages.append(paragraphs)
     return pages
 
+# ---------------- DOCX Extraction ----------------
+def extract_paragraphs_docx(file_path_or_bytes, in_memory=False):
+    # Load document
+    doc = Document(file_path_or_bytes)  # Works for both file and BytesIO
 
-def extract_text_docx(file_path, max_words=300):
-    doc = docx.Document(file_path)
-    paragraphs = [p.text.strip() for p in doc.paragraphs if p.text.strip()]
+    pages = [[]]  # Start with first "page"
+    for para in doc.paragraphs:
+        text = para.text.strip()
+        if not text:
+            continue
+        # Check for manual page break
+        has_page_break = False
+        for run in para.runs:
+            for elem in run._element:
+                if elem.tag.endswith('br') and elem.get('{http://schemas.openxmlformats.org/wordprocessingml/2006/main}type') == 'page':
+                    has_page_break = True
+        if has_page_break:
+            # Start a new page
+            pages.append([])
+        pages[-1].append(clean_text(text))
 
-    pages, current_page, word_count = [], [], 0
-
-    for para in paragraphs:
-        words = para.split()
-        n_words = len(words)
-
-        if word_count + n_words > max_words:
-            pages.append(current_page)
-            current_page, word_count = [], 0
-
-        current_page.append(para)
-        word_count += n_words
-
-    if current_page:
-        pages.append(current_page)
-
-    return pages
+    # Remove empty pages (could occur if file starts/ends with break)
+    pages = [page for page in pages if page]
+    return pages  # Each entry: list of paragraphs on that page
 
 
-def smart_chunk_paragraphs_by_page(pages, min_words=200, max_words=300):
+# ---------------- Paragraph Chunking ----------------
+def paragraph_chunks_by_page(pages):
     chunks = []
-
     for i, page in enumerate(pages, start=1):
-        current_chunk = []
-        word_count = 0
-
         for para in page:
-            words = para.split()
-            n_words = len(words)
-
-            # Split large paragraph into multiple chunks
-            if n_words > max_words:
-                if current_chunk:
-                    chunks.append((i, " ".join(current_chunk)))
-                    current_chunk = []
-                    word_count = 0
-                for j in range(0, n_words, max_words):
-                    chunks.append((i, " ".join(words[j:j + max_words])))
-                continue
-
-            # Combine small paragraphs
-            if word_count + n_words > max_words:
-                chunks.append((i, " ".join(current_chunk)))
-                current_chunk = []
-                word_count = 0
-
-            current_chunk.append(para)
-            word_count += n_words
-
-        if current_chunk:
-            chunks.append((i, " ".join(current_chunk)))
-
+            chunks.append((i, para))
     return chunks
 
+# ---------------- AI Detection ----------------
+def detect_ai_text_paragraphs(pages, model=None, vectorizer=None, threshold=0.05):
+    if model is None:
+        model = lgb_model
+    if vectorizer is None:
+        vectorizer = globals()["vectorizer"]
 
-def detect_ai_text(texts, model=lgb_model, vectorizer=vectorizer, threshold=0.5):
-    """
-    Predict whether given text(s) are AI-written or Human-written.
-    texts: string or list of strings
-    threshold: probability cutoff (default = 0.5)
-    """
-    if isinstance(texts, str):
-        texts = [texts]
+    chunks = paragraph_chunks_by_page(pages)
+    texts = [para for _, para in chunks]
 
     X = vectorizer.transform(texts)
     probs = model.predict_proba(X)[:, 1]
 
     results = []
-    for t, p in zip(texts, probs):
-        label = "AI-generated" if p >= threshold else "Human-written"
+    for (page_num, para), prob in zip(chunks, probs):
+        label = "AI-generated" if prob >= threshold else "Human-written"
         results.append({
-            "text_preview": t[:100] + ("..." if len(t) > 100 else ""),
-            "probability_AI": round(float(p), 4),
+            "page": page_num,
+            "paragraph": para,
+            "word_count": len(para.split()),
+            "probability_AI": round(float(prob), 4),
             "prediction": label
         })
     return results
+
+# ---------------- Raw Text Processing ----------------
+def process_text(text):
+    paragraphs = [p.strip() for p in text.split("\n") if p.strip()]
+    pages = [paragraphs]
+    chunks = paragraph_chunks_by_page(pages)
+    detections = detect_ai_text_paragraphs(pages)
+    return chunks, detections
