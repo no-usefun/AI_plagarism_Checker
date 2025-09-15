@@ -4,7 +4,7 @@
   <meta charset="utf-8"/>
   <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
   <title>AI Plagiarism Detector</title>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&amp;display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet"/>
   <style>
     body {
       font-family: 'Orbitron', sans-serif;
@@ -128,23 +128,31 @@
     <h1>⚡ AI Plagiarism Detector ⚡</h1>
     <form enctype="multipart/form-data" method="post">
       <div class="input-row">
-        <textarea name="input_text" id="inputText" placeholder="Paste your text here...">{{ request.form.get('input_text', '') }}</textarea>
+        <textarea name="input_text" id="inputText" placeholder="Paste your text here..."></textarea>
         <label class="upload-box" for="fileInput">
-          📂 Click or Drop File (TXT / PDF / DOCX)
+          📂 Click or Drop File (PDF / DOCX)
         </label>
         <input accept=".txt,.pdf,.docx" id="fileInput" name="file" type="file"/>
       </div>
       <button type="submit" class="btn btn-upload">Upload or Check</button>
     </form>
+
     {% if file_chunks %}
       <h2>File Analysis Results:</h2>
-      {% for (page_num, para), detect in zipped_file_data %}
+      {% for (num, para), detect in zipped_file_data %}
         <div class="chunk {% if detect.prediction == 'AI-generated' %}ai{% else %}human{% endif %}">
-          <strong>Page {{ page_num }}:</strong> {{ para }}<br>
+          <strong>
+            {% if file_type == 'pdf' %}
+              Page {{ num }}:
+            {% else %}
+              Paragraph {{ num }}:
+            {% endif %}
+          </strong> {{ para }}<br>
           <strong>Prediction:</strong> {{ detect.prediction }}
         </div>
       {% endfor %}
     {% endif %}
+
     {% if text_detections %}
       <h2>Text Analysis Results:</h2>
       {% for detect in text_detections %}
@@ -155,14 +163,24 @@
       {% endfor %}
     {% endif %}
   </div>
+
   <script>
-    // Autofill textarea with TXT file content
     const fileInput = document.getElementById("fileInput");
     const textArea = document.getElementById("inputText");
+
+    // Reset on page load (clear memory)
+    window.onload = () => {
+      if (fileInput) fileInput.value = "";
+      if (textArea) textArea.value = "";
+    };
+
+    // If file is chosen → clear textarea
     if (fileInput) {
       fileInput.addEventListener("change", function() {
         const file = this.files[0];
         if (!file) return;
+        textArea.value = ""; // clear text
+
         if (file.type === "text/plain") {
           const reader = new FileReader();
           reader.onload = function(e) {
@@ -170,6 +188,13 @@
           };
           reader.readAsText(file);
         }
+      });
+    }
+
+    // If text is typed → clear file input
+    if (textArea) {
+      textArea.addEventListener("input", function() {
+        if (fileInput) fileInput.value = "";
       });
     }
   </script>

@@ -9,8 +9,6 @@ venv/
 env/
 *.env
 
-# Flask uploads folder
-uploads/
 
 # Logs
 *.log

@@ -24,9 +24,16 @@ def clean_text(text):
     text = re.sub(r'\s+', ' ', text)
     return text.strip()
 
-# ---------------- PDF Extraction ----------------
+# ---------------- Raw Text Processing ----------------
+def process_text(text):
+    paragraphs = [p.strip() for p in text.split("\n") if p.strip()]
+    pages = [paragraphs]
+    chunks = paragraph_chunks_by_page(pages)
+    detections = detect_ai_text_paragraphs(pages)
+    return chunks, detections
 
-def extract_paragraphs_pdf(file_path, min_words=200, max_words=300):
+# ---------------- PDF Extraction ----------------
+def extract_paragraphs_pdf(file_path):
 
     reader = PyPDF2.PdfReader(file_path)
     pages = []
@@ -52,16 +59,27 @@ def extract_paragraphs_docx(file_path_or_bytes, in_memory=False):
         has_page_break = False
         for run in para.runs:
             for elem in run._element:
-                if elem.tag.endswith('br') and elem.get('{http://schemas.openxmlformats.org/wordprocessingml/2006/main}type') == 'page':
+                if elem.tag.endswith('br') and elem.get(
+                    '{http://schemas.openxmlformats.org/wordprocessingml/2006/main}type'
+                ) == 'page':
                     has_page_break = True
         if has_page_break:
             # Start a new page
             pages.append([])
         pages[-1].append(clean_text(text))
 
-    # Remove empty pages (could occur if file starts/ends with break)
+    # Remove empty pages
     pages = [page for page in pages if page]
-    return pages  # Each entry: list of paragraphs on that page
+
+    # Instead of returning pages, flatten into paragraph-numbered chunks
+    paragraphs = []
+    para_num = 1
+    for page in pages:
+        for para in page:
+            paragraphs.append([clean_text(para)])  # keep same structure
+            para_num += 1
+
+    return paragraphs  # Each entry = single paragraph
 
 
 # ---------------- Paragraph Chunking ----------------
@@ -97,10 +115,4 @@ def detect_ai_text_paragraphs(pages, model=None, vectorizer=None, threshold=0.05
         })
     return results
 
-# ---------------- Raw Text Processing ----------------
-def process_text(text):
-    paragraphs = [p.strip() for p in text.split("\n") if p.strip()]
-    pages = [paragraphs]
-    chunks = paragraph_chunks_by_page(pages)
-    detections = detect_ai_text_paragraphs(pages)
-    return chunks, detections
+

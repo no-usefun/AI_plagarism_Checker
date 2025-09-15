@@ -10,7 +10,6 @@ from utils import (
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 import os
-import json
 
 main_routes = Blueprint('main', __name__, template_folder='templates')
 
@@ -119,18 +118,3 @@ def upload_file():
         filename=filename,
         zipped_file_data=zip(file_chunks, file_detections)
     )
-
-
-@main_routes.route("/download_ai_pdf", methods=["POST"])
-def download_ai_pdf():
-    """
-    Generate PDF with only AI-generated paragraphs.
-    Receives detections JSON from frontend.
-    """
-    data = request.form.get("detections_json", "[]")
-    try:
-        detections = json.loads(data)
-    except json.JSONDecodeError:
-        return jsonify({"error": "Invalid JSON"}), 400
-
-    return create_ai_pdf(detections)
