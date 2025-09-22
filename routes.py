@@ -1,4 +1,4 @@
-from flask import Blueprint, request, render_template
+from flask import Blueprint, request, render_template, jsonify
 from io import BytesIO
 from utils import (
     extract_paragraphs_pdf,
@@ -80,3 +80,8 @@ def upload_file():
         zipped_file_data=zip(file_chunks, file_detections),
         overall_score=overall_score
     )
+
+# ---------------- Ping Route ----------------
+@main_routes.route("/ping")
+def ping():
+    return jsonify({"status": "alive"}), 200
