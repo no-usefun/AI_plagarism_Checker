@@ -7,8 +7,10 @@ import os
 import numpy as np
 
 # ---------------- Load Model & Vectorizer ----------------
-MODEL_PATH = os.path.join("models", "lightgbm_ai_detector.pkl")
-VECTORIZER_PATH = os.path.join("models", "tfidf_vectorizer.pkl")
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+MODEL_PATH = os.path.join(BASE_DIR, "models", "lightgbm_ai_detector.pkl")
+VECTORIZER_PATH = os.path.join(BASE_DIR, "models", "tfidf_vectorizer.pkl")
 
 lgb_model = joblib.load(MODEL_PATH)
 vectorizer = joblib.load(VECTORIZER_PATH)
