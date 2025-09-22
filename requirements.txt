@@ -3,4 +3,4 @@ gunicorn==23.0.0
 PyPDF2==3.0.1
 python-docx==1.1.0
 joblib==1.4.2
-numpy==1.26.4s
+numpy==1.26.4
