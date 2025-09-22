@@ -4,6 +4,7 @@ import joblib
 import re
 import unicodedata
 import os
+import numpy as np
 
 # ---------------- Load Model & Vectorizer ----------------
 MODEL_PATH = os.path.join("models", "lightgbm_ai_detector.pkl")
@@ -90,18 +91,25 @@ def paragraph_chunks_by_page(pages):
             chunks.append((i, para))
     return chunks
 
+
+
 # ---------------- AI Detection ----------------
-def detect_ai_text_paragraphs(pages, model=None, vectorizer=None, threshold=0.05):
+def detect_ai_text_paragraphs(pages, model=None, vectorizer=None, threshold=0.6):
     if model is None:
         model = lgb_model
     if vectorizer is None:
         vectorizer = globals()["vectorizer"]
-
+        
     chunks = paragraph_chunks_by_page(pages)
     texts = [para for _, para in chunks]
 
     X = vectorizer.transform(texts)
-    probs = model.predict_proba(X)[:, 1]
+
+    # try:
+    #     probs = model.predict_proba(X)[:,1] * 25
+    # except:
+    raw_scores = model.predict_proba(X)[:,1] * 25
+    probs = 1 / (1 + np.exp(-raw_scores))
 
     results = []
     for (page_num, para), prob in zip(chunks, probs):
@@ -115,4 +123,17 @@ def detect_ai_text_paragraphs(pages, model=None, vectorizer=None, threshold=0.05
         })
     return results
 
+def overall_ai_score(detections):
+    if not detections:
+        return 0.0
+
+    ai_sum = sum(d["probability_AI"] for d in detections if d["prediction"] == "AI-generated")
+    human_sum = sum(d["probability_AI"] for d in detections if d["prediction"] == "Human-written")
+
+    denom = ai_sum + human_sum
+    if denom == 0:
+        return 0.0
+
+    overall_score = (ai_sum / denom) * 100
+    return round(overall_score, 2)
 
