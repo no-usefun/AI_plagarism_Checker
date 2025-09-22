@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: AI-Plagiarism-Checker
+    env: python
+    plan: free
+    runtime: "python-3.12.3"
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "gunicorn app:app"
+    # optionally set region, health check path, etc.
