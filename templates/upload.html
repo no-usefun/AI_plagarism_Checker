@@ -161,28 +161,42 @@ window.onload = () => {
   if (progressLabel) progressLabel.style.display = "none";
 
   {% if overall_score %}
-    const score = {{ overall_score }};
-    if(progressContainer && progressBar && progressLabel){
-      progressContainer.style.display = "block";
-      progressLabel.style.display = "block";
+  const score = {{ overall_score }};
+  if (progressContainer && progressBar && progressLabel) {
+    progressContainer.style.display = "block";
+    progressLabel.style.display = "block";
+
+    // Handle 0% separately with empty bar
+    if (score <= 0) {
+      progressBar.style.width = "0%";   // empty bar
+      progressBar.style.background = "#00ff00"; // green for 0%
+      progressLabel.textContent = "Overall AI Probability: 0%";
+    } else {
       let current = 0;
       const step = score / 100;
       const interval = setInterval(() => {
         current += step;
-        if(current >= score){
+
+        if (current >= score) {
           current = score;
           clearInterval(interval);
         }
+
         progressBar.style.width = current + "%";
-        if(score == 0) progressBar.style.background = "#00ff00";
-        else if(current < 15) progressBar.style.background = "#00ff00";
-        else if(current < 30) progressBar.style.background = "#ffff00";
-        else progressBar.style.background = "#ff0000";
+
+        // Color logic
+        if (current < 15) progressBar.style.background = "#00ff00"; // green
+        else if (current < 30) progressBar.style.background = "#ffff00"; // yellow
+        else progressBar.style.background = "#ff0000"; // red
+
         progressLabel.textContent = "Overall AI Probability: " + current.toFixed(2) + "%";
       }, 20);
     }
+  }
   {% endif %}
 };
+
+
 
 // File input display
 if(fileInput){

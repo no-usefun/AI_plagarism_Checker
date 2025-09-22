@@ -1,31 +1,38 @@
-# Python cache files
+# Byte-compiled / optimized / DLL files
 __pycache__/
-*.pyc
-*.pyo
-*.pyd
+*.py[cod]
+*$py.class
 
 # Virtual environment
-venv/
+.venv/
 env/
-*.env
+venv/
+ENV/
 
+# Flask instance folder
+instance/
+
+# Model files
+models/
+*.h5
+*.pt
+*.ckpt
+*.pkl
 
 # Logs
 *.log
 
-# IDE/editor settings
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# VS Code settings
 .vscode/
-.idea/
-*.sublime-project
-*.sublime-workspace
 
 # OS-specific files
 .DS_Store
 Thumbs.db
 
-# Byte-compiled / temporary files
-*.swp
-*.tmp
-
-# Git itself
-.gitignore
+# Python packaging
+*.egg-info/
+dist/
+build/
