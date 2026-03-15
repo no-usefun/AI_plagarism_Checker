@@ -1,75 +1,123 @@
-# AI Plagiarism Checker
+<div align="center">
 
-An **AI-powered plagiarism detection system** that determines whether a piece of text is plagiarized from another using **machine learning techniques**.
+# ⚡ AI Plagiarism Checker
 
-The system converts text into numerical vectors using **TF-IDF Vectorization** and classifies plagiarism using a **LightGBM model**.
-The application includes a **Flask backend with an HTML interface**.
+AI-powered system that detects **AI-generated vs human-written text** using **TF-IDF vectorization and LightGBM classification**.
+
+![Python](https://img.shields.io/badge/Python-3.9+-blue?logo=python&logoColor=white)
+![Flask](https://img.shields.io/badge/Flask-Web_Framework-black?logo=flask)
+![LightGBM](https://img.shields.io/badge/LightGBM-Gradient_Boosting-green)
+![Scikit-Learn](https://img.shields.io/badge/Scikit--Learn-Machine_Learning-orange?logo=scikitlearn)
+![TF-IDF](https://img.shields.io/badge/TF--IDF-Vectorizer-blue)
+![HTML](https://img.shields.io/badge/HTML-Frontend-red?logo=html5)
+![CSS](https://img.shields.io/badge/CSS-Styling-blue?logo=css3)
+![Render](https://img.shields.io/badge/Render-Deployment-purple)
+![License](https://img.shields.io/badge/License-MIT-yellow)
+
+### Live Demo
+https://ai-plagarism-checker-3jzr.onrender.com/
+
+</div>
 
 ---
 
-# Live Demo
+# Overview
 
-Try the deployed application:
+This project is a **machine learning powered AI text detection and plagiarism analysis system**.
 
-https://ai-plagarism-checker-3jzr.onrender.com/
+It analyzes text using **TF-IDF feature extraction** and classifies it using a **LightGBM model** to determine whether the content is **AI-generated or human-written**.
+
+The system allows users to:
+
+- Paste text for analysis
+- Upload **PDF / DOCX files**
+- View **AI probability scores**
+- Get detailed analysis of each paragraph or page
 
 ---
 
 # Screenshots
 
-### File Input Interface
+## Main Interface
 
-![Homepage](screenshots/p1.png)
+![Main Interface](screenshots/p1.png)
 
-### Text Input Interface
+---
 
-![Input Interface](screenshots/p2.png)
+## Text Input Mode
 
-### Prediction Result
+![Text Input](screenshots/p2.png)
 
-![Prediction Result](screenshots/p3.png)
+---
 
-### Model Prediction Example
+## File Upload + AI Probability
 
-![Model Output](screenshots/p4.png)
+![File Analysis](screenshots/p3.png)
 
-*(Add or remove screenshots as needed)*
+---
+
+## Detailed File Analysis Output
+
+![Detailed Result](screenshots/p4.png)
 
 ---
 
 # Features
 
-* Machine learning based plagiarism detection
-* TF-IDF feature extraction
-* LightGBM classification model
-* Flask web interface
-* Real-time plagiarism prediction
+- Detects **AI-generated vs human-written text**
+- Supports **direct text input**
+- Supports **PDF and DOCX file upload**
+- Displays **AI probability score**
+- Provides **detailed analysis output**
+- Fast ML inference using **LightGBM**
+- Modern **neon UI design**
 
 ---
 
 # Tech Stack
 
 ### Backend
-
-* Python
-* Flask
+- Python
+- Flask
 
 ### Machine Learning
-
-* LightGBM
-* Scikit-learn
-* TF-IDF Vectorizer
-* Pandas
-* NumPy
+- LightGBM
+- Scikit-learn
+- TF-IDF Vectorizer
+- Pandas
+- NumPy
 
 ### Frontend
-
-* HTML
-* CSS
+- HTML
+- CSS
+- JavaScript
 
 ### Deployment
+- Render
 
-* Render
+---
+
+# System Architecture
+
+```
+User Input (Text / File)
+        │
+        ▼
+Text Extraction (PDF / DOCX)
+        │
+        ▼
+Text Preprocessing
+        │
+        ▼
+TF-IDF Vectorization
+        │
+        ▼
+LightGBM Model
+        │
+        ▼
+Prediction
+(AI Generated / Human Written)
+```
 
 ---
 
@@ -87,10 +135,10 @@ AI_plagarism_Checker
 │   └── index.html
 │
 ├── screenshots
-│   ├── homepage.png
-│   ├── input_page.png
-│   ├── result.png
-│   └── output_example.png
+│   ├── p1.png
+│   ├── p2.png
+│   ├── p3.png
+│   └── p4.png
 │
 ├── requirements.txt
 └── README.md
@@ -100,19 +148,19 @@ AI_plagarism_Checker
 
 # Installation
 
-## Clone the repository
+Clone the repository
 
 ```
 git clone https://github.com/no-usefun/AI_plagarism_Checker.git
 ```
 
-## Move into the project directory
+Move into the project folder
 
 ```
 cd AI_plagarism_Checker
 ```
 
-## Install dependencies
+Install dependencies
 
 ```
 pip install -r requirements.txt
@@ -120,13 +168,15 @@ pip install -r requirements.txt
 
 ---
 
-# Run the Application
+# Run Locally
+
+Start the Flask server
 
 ```
 python app.py
 ```
 
-Then open:
+Open the application in your browser
 
 ```
 http://127.0.0.1:5000
@@ -134,47 +184,39 @@ http://127.0.0.1:5000
 
 ---
 
-# How It Works
-
-1. User inputs two pieces of text.
-2. Text is preprocessed and cleaned.
-3. TF-IDF converts the text into numerical vectors.
-4. The vectors are passed to the LightGBM classifier.
-5. The model predicts whether plagiarism exists.
-
----
-
 # Model Pipeline
 
 ```
-Text Input
-   ↓
-Text Preprocessing
-   ↓
+Text / Document Input
+        ↓
+Text Extraction
+        ↓
+Cleaning & Preprocessing
+        ↓
 TF-IDF Vectorization
-   ↓
-LightGBM Model
-   ↓
-Prediction
+        ↓
+LightGBM Classifier
+        ↓
+AI Probability + Prediction
 ```
 
 ---
 
 # Future Improvements
 
-* Sentence level plagiarism highlighting
-* File upload support (PDF/DOCX)
-* Similarity percentage score
-* API support
-* Larger training dataset
+- Sentence-level AI detection
+- Highlight AI-generated sections
+- Real plagiarism similarity scoring
+- REST API for integration
+- Larger dataset training
 
 ---
 
 # Deployment
 
-Hosted on **Render**
+The application is deployed on **Render**.
 
-Live URL
+Live Demo  
 https://ai-plagarism-checker-3jzr.onrender.com/
 
 ---
@@ -182,3 +224,15 @@ https://ai-plagarism-checker-3jzr.onrender.com/
 # License
 
 MIT License
+
+---
+
+# Author
+
+Harsh Agarwal
+
+GitHub  
+https://github.com/no-usefun
+
+Email  
+itsharsh636@gmail.com
