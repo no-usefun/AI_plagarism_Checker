@@ -40,13 +40,13 @@ The system allows users to:
 
 ## Main Interface
 
-![Main Interface](screenshots/p1.png)
+![Main Interface](screenshots/p2.png)
 
 ---
 
 ## Text Input Mode
 
-![Text Input](screenshots/p2.png)
+![Text Input](screenshots/p1.png)
 
 ---
 
