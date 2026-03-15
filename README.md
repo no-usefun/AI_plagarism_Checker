@@ -19,19 +19,19 @@ https://ai-plagarism-checker-3jzr.onrender.com/
 
 ### File Input Interface
 
-![Homepage](screenshots/1.png)
+![Homepage](screenshots/p1.png)
 
 ### Text Input Interface
 
-![Input Interface](screenshots/2.png)
+![Input Interface](screenshots/p2.png)
 
 ### Prediction Result
 
-![Prediction Result](screenshots/3.png)
+![Prediction Result](screenshots/p3.png)
 
 ### Model Prediction Example
 
-![Model Output](screenshots/output_example.png)
+![Model Output](screenshots/p4.png)
 
 *(Add or remove screenshots as needed)*
 
